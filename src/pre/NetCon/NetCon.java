@@ -1,6 +1,9 @@
 package src.pre.NetCon;
 
 import net.bitBytes.converters.types.enums.BitRegisteredEnums;
+import src.net.TrackGaze.TrackGaze;
+import src.net.TrackGaze.log.Log;
+import src.net.TrackGaze.log.LogGroup;
 import src.pre.NetCon.connection.NetConnection;
 import src.pre.NetCon.connection.client.NetClient;
 import src.pre.NetCon.connection.host.NetHost;
@@ -20,23 +23,35 @@ public class NetCon {
     private static NetConnection con = null;
     public static final NetRegistry registry = new NetRegistry();
 
-    public static void init(NetConnection connection) throws StillRunning, InvalidConnection {
+    public static final LogGroup netRootGroup = new LogGroup(TrackGaze.rootGroup, "net_root");
+
+    public static void init(NetConnection connection) throws StillRunning {
+        Log.debug(netRootGroup, "Initialize", "Attempt to initialize NetCon.");
+
         if (con != null && con.isRunning())
             throw new StillRunning("The connection you are attempting to initialize is still running.");
 
         con = connection;
 
         BitRegisteredEnums.registerEnums(EncryptionType.class);
+
+        Log.info(netRootGroup, "Initialized", "NetCon has been initialized.");
     }
 
     public static void start() throws AlreadyRunning, IOException {
+        Log.debug(netRootGroup, "Starting", "Attempt to start NetCon.");
         con.start();
+        Log.info(netRootGroup, "Started", "Started NetCon.");
     }
     public static void stop() throws IOException {
+        Log.debug(netRootGroup, "Stopping", "Attempt to stop NetCon.");
         con.stop();
+        Log.info(netRootGroup, "Stopped", "Stopped NetCon.");
     }
 
     public static void send(PacketOUT packet) throws InvalidConnection, IOException {
+        Log.debug(netRootGroup, "SendingNoGroup", "Attempt to send without a target group.");
+
         if (con == null)
             throw new InvalidConnection("The connection is not yet initialized. Use init() to initialize the connection.");
 
@@ -48,6 +63,8 @@ public class NetCon {
         }
     }
     public static void send(PacketOUT packet, String group) throws InvalidConnection, IOException {
+        Log.debug(netRootGroup, "SendingGroup", "Attempt to send with a target group.");
+
         if (con == null)
             throw new InvalidConnection("The connection is not yet initialized. Use init() to initialize the connection.");
 
@@ -61,6 +78,8 @@ public class NetCon {
     }
 
     public static void registerSystem(int id, Class<? extends Packet> packetClass) {
+        Log.debug(netRootGroup, "RegisterSystem", "Attempt to register a system packet.");
+
         if (id >= 100 || id <= -100)
             throw new InvalidArgument("ID's within the bounds of -100 & 100 are reserved for system packets.");
 
@@ -72,6 +91,8 @@ public class NetCon {
         }
     }
     public static void register(int id, Class<? extends Packet> packetClass) {
+        Log.debug(netRootGroup, "Register", "Attempt to register a custom packet.");
+
         if (id < 100 && id > -100)
             throw new InvalidArgument("ID's within the bounds of -100 & 100 are reserved for system packets.");
 

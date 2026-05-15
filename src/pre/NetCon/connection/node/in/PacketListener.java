@@ -4,8 +4,9 @@ import net.aSysSync.ASysThread;
 import net.bitBytes.BitBytes;
 import net.bitBytes.BitUtil;
 import net.bitBytes.converters.BitDecoder;
-import net.bitBytes.converters.types.BitLong;
 import net.bitBytes.util.Holder;
+import src.net.TrackGaze.log.Log;
+import src.net.TrackGaze.log.LogGroup;
 import src.pre.NetCon.connection.node.NetNode;
 import src.pre.NetCon.connection.node.keys.NetKeyManager;
 import src.pre.NetCon.exceptions.InvalidKey;
@@ -25,20 +26,28 @@ public class PacketListener {
     private final InputStream inputStream;
     private final NetKeyManager keyManager;
 
-    private final ASysThread listener = new ASysThread("PacketListener");
+    private final ASysThread listener = new ASysThread();
 
     private long packetCount = -1;
 
+    public static final LogGroup packetListenGroup = new LogGroup(NetNode.nodeGroup, "packet_listener");
+
     public PacketListener(NetNode node, InputStream inputStream, NetKeyManager keyManager) {
+        Log.debug(packetListenGroup, "Initialize", "Initialize the packet listener.");
+
         this.node = node;
 
         this.inputStream = inputStream;
         this.keyManager = keyManager;
 
         this.start();
+
+        Log.info(packetListenGroup, "Initialized", "Initialized the packet listener.");
     }
 
     public void start() {
+        Log.debug(packetListenGroup, "Starting", "Starting the packet listener.");
+
         this.listener.loop("ListeningForPackets", () -> {
             Holder<byte[]> data = new Holder<>(new byte[0]);
 
@@ -48,17 +57,23 @@ public class PacketListener {
                     if (receivedBytes == -1) break;
 
                     BitUtil.mergeArrays(data, new byte[]{(byte) receivedBytes});
-                    if (process(data)) break;
+                    if (process(new Holder<>(data.obj))) break;
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
         });
+
+        Log.info(packetListenGroup, "Started", "Started the packet listener.");
     }
     public void stop() throws IOException {
+        Log.debug(packetListenGroup, "Stopping", "Stopping the packet listener.");
+
         this.listener.stop();
         this.inputStream.close();
+
+        Log.info(packetListenGroup, "Stopped", "Stopped the packet listener.");
     }
 
     public boolean process(Holder<byte[]> data) {
@@ -71,23 +86,19 @@ public class PacketListener {
                 catchData(packetBytes, BracketData.HEAD_OPENING_BRACKET, BracketData.HEAD_CLOSING_BRACKET)
         );
 
-        Holder<byte[]> initialVector = new Holder<>(new byte[0]);
-
-        BitUtil.mergeArrays(initialVector,
-                BitLong.encode((long) headerBytes.get("initialVector1")),
-                BitLong.encode((long) headerBytes.get("initialVector2"))
-        );
-
         HeaderData headerData = new HeaderData(
                 (EncryptionType) headerBytes.get("EncryptionType"),
-                initialVector.obj,
+                (byte[]) headerBytes.get("initialVector"),
                 (int) headerBytes.get("keyID"),
                 (int) headerBytes.get("packetID"),
                 (long) headerBytes.get("packetCount")
         );
 
-        if (headerData.packetCount() == packetCount - 1) return true;
-        this.packetCount = headerData.packetCount();
+        Log.debug(packetListenGroup, "process", "Processing packet: " + headerData.packetID());
+
+        if (headerData.packetCount() != packetCount) return true;
+
+        this.packetCount = headerData.packetCount() + 1;
 
         byte[] contentBytes = catchData(packetBytes, BracketData.CONTENT_OPENING_BRACKET, BracketData.CONTENT_CLOSING_BRACKET);
 
@@ -95,7 +106,7 @@ public class PacketListener {
             PacketIN.process(contentBytes, headerData, this.node, this.keyManager);
 
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | InvalidKey e) {
-            return true;
+            throw new RuntimeException(e);
         }
 
         return true;
@@ -120,8 +131,8 @@ public class PacketListener {
                 continue;
 
             } else {
-                for (int j = 0; j < 8; j++) {
-                    if (data.obj[i + j] == closingBracket[j]) continue;
+                for (int j = 1; j <= 8; j++) {
+                    if (data.obj[i + j] == closingBracket[j - 1]) continue;
 
                     isCloseKey = false;
                     break;
@@ -129,10 +140,11 @@ public class PacketListener {
             }
             if (isCloseKey) {
                 if (startPos == -1) continue;
-                length = i - startPos;
+                length = i - startPos + 1;
             }
             if (startPos != -1 && length != -1) break;
         }
+
         if (startPos != -1 && length != -1) {
             BitUtil.removeBytes(data, startPos);
             return BitUtil.getRemoveBytes(data, length);

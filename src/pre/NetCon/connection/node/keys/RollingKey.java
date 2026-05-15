@@ -5,6 +5,7 @@ import net.aSysSync.ASysUtil;
 import src.pre.NetCon.connection.host.packets.out.rollingKey.HUpdateRollingKey;
 import src.pre.NetCon.connection.node.NetNode;
 import src.pre.NetCon.exceptions.InvalidKey;
+import src.pre.NetCon.security.EncryptionType;
 import src.pre.NetCon.security.SymmetricCrypt;
 import src.pre.NetCon.security.SymmetricKey;
 
@@ -47,7 +48,8 @@ public class RollingKey {
 
     private void shareKey() {
         try {
-            this.node.send(new HUpdateRollingKey(keys.getLast()));
+            if (!this.node.isVerified()) return;
+            this.node.send(new HUpdateRollingKey(keys.getLast()), EncryptionType.ASYMMETRIC);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

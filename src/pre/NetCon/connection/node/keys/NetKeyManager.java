@@ -8,8 +8,6 @@ import java.security.PublicKey;
 
 public class NetKeyManager {
 
-    private final NetNode node;
-
     private final KeyPair keyPair = AsymmetricCrypt.genAsymKeys();
     private PublicKey targetKey;
 
@@ -18,9 +16,7 @@ public class NetKeyManager {
     private final boolean hosting;
 
     public NetKeyManager(NetNode node, boolean hosting) {
-        this.node = node;
-
-        this.rollingKey = new RollingKey(this.node, hosting);
+        this.rollingKey = new RollingKey(node, hosting);
 
         this.hosting = hosting;
 

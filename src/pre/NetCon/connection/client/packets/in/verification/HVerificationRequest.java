@@ -3,6 +3,7 @@ package src.pre.NetCon.connection.client.packets.in.verification;
 import src.pre.NetCon.connection.client.packets.out.CVerifyScramble;
 import src.pre.NetCon.connection.node.NetNode;
 import src.pre.NetCon.packet.PacketIN;
+import src.pre.NetCon.security.EncryptionType;
 import src.pre.NetCon.security.KeyScrambler;
 
 import java.io.IOException;
@@ -17,7 +18,7 @@ public class HVerificationRequest extends PacketIN {
             node.send(new CVerifyScramble(
                     KeyScrambler.scramble(verifyKey),
                     verifyKey
-            ));
+            ), EncryptionType.NONE);
 
             node.updateExpectedPacket(2);
 

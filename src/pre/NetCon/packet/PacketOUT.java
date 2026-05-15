@@ -4,6 +4,9 @@ import net.bitBytes.BitBytes;
 import net.bitBytes.BitUtil;
 import net.bitBytes.converters.BitEncoder;
 import net.bitBytes.util.Holder;
+import src.net.TrackGaze.log.Log;
+import src.net.TrackGaze.log.LogGroup;
+import src.pre.NetCon.NetCon;
 import src.pre.NetCon.connection.node.keys.NetKeyManager;
 import src.pre.NetCon.exceptions.InvalidArgument;
 import src.pre.NetCon.packet.data.BracketData;
@@ -19,8 +22,12 @@ public non-sealed abstract class PacketOUT extends Packet {
 
     private static long packetCount = -1;
 
+    public static final LogGroup outGroup = new LogGroup(NetCon.netRootGroup, "packet_out");
+
     public byte[] serialize(EncryptionType encryptionType, NetKeyManager keyManager) {
         RegisteredPacketOUT savedPacket = registry.getOUT(this.getClass());
+
+        Log.debug(outGroup, "Sending", "Sending packet with id: " + savedPacket.id());
 
         BitBytes packetData = new BitBytes();
         savedPacket.fields().forEach(field -> packetData.put(field.name(), field.getValue(this)));
@@ -42,6 +49,11 @@ public non-sealed abstract class PacketOUT extends Packet {
                 keyID = -1;
 
                 encryptedData = AsymmetricCrypt.encrypt(encodedData, keyManager.getTargetKey());
+            }
+            case NONE -> {
+                keyID = -1;
+
+                encryptedData = encodedData;
             }
 
             default -> throw new InvalidArgument("Attempted to use an invalid encryption type.");

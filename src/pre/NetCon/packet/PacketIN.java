@@ -2,6 +2,9 @@ package src.pre.NetCon.packet;
 
 import net.bitBytes.BitBytes;
 import net.bitBytes.converters.BitDecoder;
+import src.net.TrackGaze.log.Log;
+import src.net.TrackGaze.log.LogGroup;
+import src.pre.NetCon.NetCon;
 import src.pre.NetCon.connection.node.NetNode;
 import src.pre.NetCon.connection.node.keys.NetKeyManager;
 import src.pre.NetCon.exceptions.InvalidArgument;
@@ -19,7 +22,11 @@ import static src.pre.NetCon.NetCon.registry;
 
 public non-sealed abstract class PacketIN extends Packet {
 
+    public static final LogGroup inGroup = new LogGroup(NetCon.netRootGroup, "packet_in");
+
     public static void process(byte[] data, HeaderData header, NetNode node, NetKeyManager keyManager) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, InvalidKey {
+        Log.debug(inGroup, "Received", "Received packet with id: " + header.packetID());
+
         if (!node.isVerified() && !node.isExpectedPacket(header.packetID())) return;
 
         byte[] decryptedData;
@@ -29,6 +36,7 @@ public non-sealed abstract class PacketIN extends Packet {
                     data, keyManager.rollingKey.getKey(header.keyID()), header.initialVector()
             );
             case ASYMMETRIC -> decryptedData = AsymmetricCrypt.decrypt(data, keyManager.getKeyPair().getPrivate());
+            case NONE -> decryptedData = data;
 
             default -> throw new InvalidArgument("Attempted to use an invalid encryption type.");
         }

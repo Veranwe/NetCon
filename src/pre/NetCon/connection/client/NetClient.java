@@ -1,5 +1,8 @@
 package src.pre.NetCon.connection.client;
 
+import src.net.TrackGaze.log.Log;
+import src.net.TrackGaze.log.LogGroup;
+import src.pre.NetCon.NetCon;
 import src.pre.NetCon.connection.NetConnection;
 import src.pre.NetCon.connection.client.packets.in.rollingKey.HUpdateRollingKey;
 import src.pre.NetCon.connection.client.packets.in.verification.HKeyExchange;
@@ -27,7 +30,11 @@ public class NetClient implements NetConnection {
 
     private boolean running = false;
 
+    public static final LogGroup clientGroup = new LogGroup(NetCon.netRootGroup, "client");
+
     public NetClient(String address, int port, String group) {
+        Log.debug(clientGroup, "Initialize", "Initializing NetClient.");
+
         this.address = address;
         this.port = port;
 
@@ -42,22 +49,32 @@ public class NetClient implements NetConnection {
         registerSystem(-1, CNotifyHostReady.class);
         registerSystem(-2, CVerifyScramble.class);
         registerSystem(-3, CKeyExchange.class);
+
+        Log.info(clientGroup, "Initialized", "Initialized NetClient.");
     }
 
     @Override
     public void start() throws IOException, AlreadyRunning {
+        Log.debug(clientGroup, "Starting", "Attempt to start NetClient.");
+
         if (this.running) throw new AlreadyRunning("NetHost is already running.");
 
         this.node = new NetNode(this.address, this.port, this.group);
 
         this.running = true;
+
+        Log.info(clientGroup, "Started", "Started NetClient.");
     }
 
     @Override
     public void stop() throws IOException {
+        Log.debug(clientGroup, "Stopping", "Attempt to stop NetClient.");
+
         this.node.stop();
 
         this.running = false;
+
+        Log.info(clientGroup, "Stopped", "Stopped NetClient.");
     }
 
     public void send(PacketOUT packet) throws IOException {

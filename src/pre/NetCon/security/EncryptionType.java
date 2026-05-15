@@ -4,5 +4,6 @@ import net.bitBytes.converters.types.enums.BitKeyedEnum;
 
 public enum EncryptionType implements BitKeyedEnum {
     SYMMETRIC,
-    ASYMMETRIC
+    ASYMMETRIC,
+    NONE
 }
