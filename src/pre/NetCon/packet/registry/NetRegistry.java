@@ -14,34 +14,38 @@ public class NetRegistry {
     private final HashMap<Integer, RegisteredPacketIN> packetsIN = new HashMap<>();
     private final HashMap<Class<? extends PacketOUT>, RegisteredPacketOUT> packetsOUT = new HashMap<>();
 
-    public void register(int id, Class<? extends Packet> packet) throws IllegalAccessException, NoSuchFieldException {
-        MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(
-                packet,
-                MethodHandles.lookup()
-        );
+    public void register(int id, Class<? extends Packet> packet) {
+        try {
+            MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(
+                    packet,
+                    MethodHandles.lookup()
+            );
 
-        ArrayList<PacketField> fields = new ArrayList<>();
+            ArrayList<PacketField> fields = new ArrayList<>();
 
-        for (Field field : packet.getDeclaredFields()) {
-            fields.add(new PacketField(
-                    field.getType(),
-                    field.getName(),
-                    lookup.findVarHandle(
-                            packet,
-                            field.getName(),
-                            field.getType()
-                    )
-            ));
-        }
+            for (Field field : packet.getDeclaredFields()) {
+                fields.add(new PacketField(
+                        field.getType(),
+                        field.getName(),
+                        lookup.findVarHandle(
+                                packet,
+                                field.getName(),
+                                field.getType()
+                        )
+                ));
+            }
 
-        if (PacketIN.class.isAssignableFrom(packet)) {
-            Class<? extends PacketIN> packetClass = packet.asSubclass(PacketIN.class);
-            this.packetsIN.put(id, new RegisteredPacketIN(packetClass, fields));
-            return;
-        }
-        if (PacketOUT.class.isAssignableFrom(packet)) {
-            Class<? extends PacketOUT> packetClass = packet.asSubclass(PacketOUT.class);
-            this.packetsOUT.put(packetClass, new RegisteredPacketOUT(id, fields));
+            if (PacketIN.class.isAssignableFrom(packet)) {
+                Class<? extends PacketIN> packetClass = packet.asSubclass(PacketIN.class);
+                this.packetsIN.put(id, new RegisteredPacketIN(packetClass, fields));
+                return;
+            }
+            if (PacketOUT.class.isAssignableFrom(packet)) {
+                Class<? extends PacketOUT> packetClass = packet.asSubclass(PacketOUT.class);
+                this.packetsOUT.put(packetClass, new RegisteredPacketOUT(id, fields));
+            }
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -19,11 +19,10 @@ public class NetKeyManager {
         this.rollingKey = new RollingKey(node, hosting);
 
         this.hosting = hosting;
-
-        this.start();
     }
 
     public void start() {
+        if (!hosting) return;
         this.rollingKey.start();
     }
     public void stop() {

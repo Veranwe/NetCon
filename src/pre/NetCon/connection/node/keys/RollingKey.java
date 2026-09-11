@@ -10,7 +10,6 @@ import src.pre.NetCon.security.SymmetricCrypt;
 import src.pre.NetCon.security.SymmetricKey;
 
 import javax.crypto.SecretKey;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class RollingKey {
@@ -47,13 +46,8 @@ public class RollingKey {
     }
 
     private void shareKey() {
-        try {
-            if (!this.node.isVerified()) return;
-            this.node.send(new HUpdateRollingKey(keys.getLast()), EncryptionType.ASYMMETRIC);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        if (!this.node.isVerified()) return;
+        this.node.send(new HUpdateRollingKey(keys.getLast()), EncryptionType.ASYMMETRIC);
     }
     public void inputKey(int id, SecretKey key) {
         if (hosting) return;
@@ -63,7 +57,7 @@ public class RollingKey {
         if (this.keys.size() > 1) this.keys.removeFirst();
     }
 
-    public SecretKey getKey(int id) throws InvalidKey {
+    public SecretKey getKey(int id) {
         SecretKey key = null;
 
         for (SymmetricKey currentKey : this.keys) {

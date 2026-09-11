@@ -3,7 +3,6 @@ package src.pre.NetCon.connection.node.in;
 import src.pre.NetCon.connection.node.NetNode;
 import src.pre.NetCon.connection.node.keys.NetKeyManager;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public class NetNodeInbound {
@@ -27,7 +26,7 @@ public class NetNodeInbound {
     public void start() {
         this.listener = new PacketListener(node, inputStream, keyManager);
     }
-    public void stop() throws IOException {
+    public void stop() {
         this.listener.stop();
     }
 }

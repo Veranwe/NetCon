@@ -13,5 +13,6 @@ public class CKeyExchange extends PacketIN {
         node.keyManager.setTargetKey(
                 AsymmetricCrypt.decodePublic(key)
         );
+        node.keyManager.start();
     }
 }

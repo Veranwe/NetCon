@@ -9,7 +9,6 @@ import src.net.TrackGaze.log.Log;
 import src.net.TrackGaze.log.LogGroup;
 import src.pre.NetCon.connection.node.NetNode;
 import src.pre.NetCon.connection.node.keys.NetKeyManager;
-import src.pre.NetCon.exceptions.InvalidKey;
 import src.pre.NetCon.packet.PacketIN;
 import src.pre.NetCon.packet.data.BracketData;
 import src.pre.NetCon.packet.data.HeaderData;
@@ -17,7 +16,6 @@ import src.pre.NetCon.security.EncryptionType;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 
 public class PacketListener {
 
@@ -27,8 +25,6 @@ public class PacketListener {
     private final NetKeyManager keyManager;
 
     private final ASysThread listener = new ASysThread();
-
-    private long packetCount = -1;
 
     public static final LogGroup packetListenGroup = new LogGroup(NetNode.nodeGroup, "packet_listener");
 
@@ -67,13 +63,17 @@ public class PacketListener {
 
         Log.info(packetListenGroup, "Started", "Started the packet listener.");
     }
-    public void stop() throws IOException {
-        Log.debug(packetListenGroup, "Stopping", "Stopping the packet listener.");
+    public void stop() {
+        try {
+            Log.debug(packetListenGroup, "Stopping", "Stopping the packet listener.");
 
-        this.listener.stop();
-        this.inputStream.close();
+            this.listener.stop();
+            this.inputStream.close();
 
-        Log.info(packetListenGroup, "Stopped", "Stopped the packet listener.");
+            Log.info(packetListenGroup, "Stopped", "Stopped the packet listener.");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean process(Holder<byte[]> data) {
@@ -96,18 +96,13 @@ public class PacketListener {
 
         Log.debug(packetListenGroup, "process", "Processing packet: " + headerData.packetID());
 
-        if (headerData.packetCount() != packetCount) return true;
+        if (headerData.packetCount() != node.packetCount) return true;
 
-        this.packetCount = headerData.packetCount() + 1;
+        node.packetCount = headerData.packetCount() + 1;
 
         byte[] contentBytes = catchData(packetBytes, BracketData.CONTENT_OPENING_BRACKET, BracketData.CONTENT_CLOSING_BRACKET);
 
-        try {
-            PacketIN.process(contentBytes, headerData, this.node, this.keyManager);
-
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | InvalidKey e) {
-            throw new RuntimeException(e);
-        }
+        PacketIN.process(contentBytes, headerData, this.node, this.keyManager);
 
         return true;
     }

@@ -6,18 +6,11 @@ import src.pre.NetCon.packet.PacketIN;
 import src.pre.NetCon.security.EncryptionType;
 import src.pre.NetCon.security.KeyScrambler;
 
-import java.io.IOException;
-
 public class CNotifyHostReady extends PacketIN {
     @Override
     public void execute(NetNode node) {
-        try {
-            node.send(new HVerificationRequest(KeyScrambler.genData()), EncryptionType.NONE);
+        node.send(new HVerificationRequest(KeyScrambler.genData()), EncryptionType.NONE);
 
-            node.updateExpectedPacket(-2);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        node.updateExpectedPacket(-2);
     }
 }

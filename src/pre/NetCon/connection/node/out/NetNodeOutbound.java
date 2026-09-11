@@ -18,14 +18,22 @@ public class NetNodeOutbound {
         this.keyManager = keyManager;
     }
 
-    public void stop() throws IOException {
-        this.outputStream.close();
+    public void stop() {
+        try {
+            this.outputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void send(PacketOUT packet) throws IOException {
-        this.send(packet, EncryptionType.SYMMETRIC);
+    public void send(PacketOUT packet, long packetCount) {
+        this.send(packet, EncryptionType.SYMMETRIC, packetCount);
     }
-    public void send(PacketOUT packet, EncryptionType encryptType) throws IOException {
-        this.outputStream.write(packet.serialize(encryptType, keyManager));
+    public void send(PacketOUT packet, EncryptionType encryptType, long packetCount) {
+        try {
+            this.outputStream.write(packet.serialize(encryptType, keyManager, packetCount));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

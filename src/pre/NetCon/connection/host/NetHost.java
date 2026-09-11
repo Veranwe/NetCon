@@ -26,19 +26,26 @@ public class NetHost implements NetConnection {
 
     private final int port;
 
-    private final ServerSocket socket = new ServerSocket();
+    private final ServerSocket socket;
     private final ArrayList<NetNode> connectedNodes = new ArrayList<>();
 
-    private final NodeListener listener = new NodeListener(this, this.socket);
+    private final NodeListener listener;
 
     private boolean running = false;
 
     public static final LogGroup hostGroup = new LogGroup(NetCon.netRootGroup, "host");
 
-    public NetHost(int port) throws IOException {
+    public NetHost(int port) {
         Log.debug(hostGroup, "Initialize", "Initializing NetHost.");
 
-        this.port = port;
+        try {
+            this.port = port;
+            this.socket = new ServerSocket();
+
+            this.listener = new NodeListener(this, this.socket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         registerSystem(1, HVerificationRequest.class);
         registerSystem(2, HVerifyConfirmed.class);
@@ -54,12 +61,16 @@ public class NetHost implements NetConnection {
     }
 
     @Override
-    public void start() throws IOException, AlreadyRunning {
+    public void start() {
         Log.debug(hostGroup, "Starting", "Attempt to start NetHost.");
 
         if (this.running) throw new AlreadyRunning("NetHost is already running.");
 
-        this.socket.bind(new InetSocketAddress(this.port));
+        try {
+            this.socket.bind(new InetSocketAddress(this.port));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         this.listener.start();
 
         this.running = true;
@@ -67,10 +78,14 @@ public class NetHost implements NetConnection {
         Log.info(hostGroup, "Started", "Started NetHost.");
     }
     @Override
-    public void stop() throws IOException {
+    public void stop() {
         Log.debug(hostGroup, "Stopping", "Attempt to stop NetHost.");
 
-        this.socket.close();
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         this.listener.stop();
 
@@ -85,14 +100,14 @@ public class NetHost implements NetConnection {
         this.connectedNodes.add(node);
     }
 
-    public void send(PacketOUT packet) throws IOException {
+    public void send(PacketOUT packet) {
         for (NetNode node : this.connectedNodes) {
             if (!node.isVerified()) continue;
 
             node.send(packet);
         }
     }
-    public void send(String targetGroup, PacketOUT packet) throws IOException {
+    public void send(String targetGroup, PacketOUT packet) {
         for (NetNode node : this.connectedNodes) {
             if (!node.getGroup().equals(targetGroup) || !node.isVerified()) continue;
 

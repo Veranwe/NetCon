@@ -15,8 +15,6 @@ import src.pre.NetCon.connection.node.NetNode;
 import src.pre.NetCon.exceptions.AlreadyRunning;
 import src.pre.NetCon.packet.PacketOUT;
 
-import java.io.IOException;
-
 import static src.pre.NetCon.NetCon.registerSystem;
 
 public class NetClient implements NetConnection {
@@ -54,7 +52,7 @@ public class NetClient implements NetConnection {
     }
 
     @Override
-    public void start() throws IOException, AlreadyRunning {
+    public void start() {
         Log.debug(clientGroup, "Starting", "Attempt to start NetClient.");
 
         if (this.running) throw new AlreadyRunning("NetHost is already running.");
@@ -67,7 +65,7 @@ public class NetClient implements NetConnection {
     }
 
     @Override
-    public void stop() throws IOException {
+    public void stop() {
         Log.debug(clientGroup, "Stopping", "Attempt to stop NetClient.");
 
         this.node.stop();
@@ -77,7 +75,7 @@ public class NetClient implements NetConnection {
         Log.info(clientGroup, "Stopped", "Stopped NetClient.");
     }
 
-    public void send(PacketOUT packet) throws IOException {
+    public void send(PacketOUT packet) {
         this.node.send(packet);
     }
 

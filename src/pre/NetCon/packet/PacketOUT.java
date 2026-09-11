@@ -20,11 +20,9 @@ import static src.pre.NetCon.NetCon.registry;
 
 public non-sealed abstract class PacketOUT extends Packet {
 
-    private static long packetCount = -1;
-
     public static final LogGroup outGroup = new LogGroup(NetCon.netRootGroup, "packet_out");
 
-    public byte[] serialize(EncryptionType encryptionType, NetKeyManager keyManager) {
+    public byte[] serialize(EncryptionType encryptionType, NetKeyManager keyManager, long packetCount) {
         RegisteredPacketOUT savedPacket = registry.getOUT(this.getClass());
 
         Log.debug(outGroup, "Sending", "Sending packet with id: " + savedPacket.id());
@@ -64,7 +62,7 @@ public non-sealed abstract class PacketOUT extends Packet {
         headerData.put("initialVector", initialVector);
         headerData.put("keyID", keyID);
         headerData.put("packetID", savedPacket.id());
-        headerData.put("packetCount", packetCount++);
+        headerData.put("packetCount", packetCount);
 
         Holder<byte[]> packet = new Holder<>(new byte[0]);
         BitUtil.mergeArrays(packet,

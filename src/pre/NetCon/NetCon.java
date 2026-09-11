@@ -7,7 +7,6 @@ import src.net.TrackGaze.log.LogGroup;
 import src.pre.NetCon.connection.NetConnection;
 import src.pre.NetCon.connection.client.NetClient;
 import src.pre.NetCon.connection.host.NetHost;
-import src.pre.NetCon.exceptions.AlreadyRunning;
 import src.pre.NetCon.exceptions.InvalidArgument;
 import src.pre.NetCon.exceptions.InvalidConnection;
 import src.pre.NetCon.exceptions.StillRunning;
@@ -16,8 +15,6 @@ import src.pre.NetCon.packet.PacketOUT;
 import src.pre.NetCon.packet.registry.NetRegistry;
 import src.pre.NetCon.security.EncryptionType;
 
-import java.io.IOException;
-
 public class NetCon {
 
     private static NetConnection con = null;
@@ -25,7 +22,7 @@ public class NetCon {
 
     public static final LogGroup netRootGroup = new LogGroup(TrackGaze.rootGroup, "net_root");
 
-    public static void init(NetConnection connection) throws StillRunning {
+    public static void init(NetConnection connection) {
         Log.debug(netRootGroup, "Initialize", "Attempt to initialize NetCon.");
 
         if (con != null && con.isRunning())
@@ -38,18 +35,18 @@ public class NetCon {
         Log.info(netRootGroup, "Initialized", "NetCon has been initialized.");
     }
 
-    public static void start() throws AlreadyRunning, IOException {
+    public static void start() {
         Log.debug(netRootGroup, "Starting", "Attempt to start NetCon.");
         con.start();
         Log.info(netRootGroup, "Started", "Started NetCon.");
     }
-    public static void stop() throws IOException {
+    public static void stop() {
         Log.debug(netRootGroup, "Stopping", "Attempt to stop NetCon.");
         con.stop();
         Log.info(netRootGroup, "Stopped", "Stopped NetCon.");
     }
 
-    public static void send(PacketOUT packet) throws InvalidConnection, IOException {
+    public static void send(PacketOUT packet) {
         Log.debug(netRootGroup, "SendingNoGroup", "Attempt to send without a target group.");
 
         if (con == null)
@@ -62,7 +59,7 @@ public class NetCon {
             default -> throw new InvalidConnection("Could not send packet due to an unexpected connection type.");
         }
     }
-    public static void send(PacketOUT packet, String group) throws InvalidConnection, IOException {
+    public static void send(PacketOUT packet, String group) {
         Log.debug(netRootGroup, "SendingGroup", "Attempt to send with a target group.");
 
         if (con == null)
@@ -83,12 +80,7 @@ public class NetCon {
         if (id >= 100 || id <= -100)
             throw new InvalidArgument("ID's within the bounds of -100 & 100 are reserved for system packets.");
 
-        try {
-            registry.register(id, packetClass);
-
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new RuntimeException("Failed to register packet, id: " + id, e);
-        }
+        registry.register(id, packetClass);
     }
     public static void register(int id, Class<? extends Packet> packetClass) {
         Log.debug(netRootGroup, "Register", "Attempt to register a custom packet.");
@@ -96,11 +88,6 @@ public class NetCon {
         if (id < 100 && id > -100)
             throw new InvalidArgument("ID's within the bounds of -100 & 100 are reserved for system packets.");
 
-        try {
-            registry.register(id, packetClass);
-
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new RuntimeException("Failed to register packet, id: " + id, e);
-        }
+        registry.register(id, packetClass);
     }
 }
