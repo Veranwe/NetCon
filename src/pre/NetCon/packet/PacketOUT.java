@@ -30,7 +30,7 @@ public non-sealed abstract class PacketOUT extends Packet {
         BitBytes packetData = new BitBytes();
         savedPacket.fields().forEach(field -> packetData.put(field.name(), field.getValue(this)));
 
-        byte[] encodedData = BitEncoder.encode(packetData);
+        byte[] encodedData = BitEncoder.encode(packetData, 923_001);
 
         byte[] initialVector = SymmetricCrypt.genInitVector();
         byte[] encryptedData;
@@ -69,7 +69,7 @@ public non-sealed abstract class PacketOUT extends Packet {
                 BracketData.NET_OPENING_BRACKET,
 
                 BracketData.HEAD_OPENING_BRACKET,
-                BitEncoder.encode(headerData),
+                BitEncoder.encode(headerData, 923_002),
                 BracketData.HEAD_CLOSING_BRACKET,
 
                 BracketData.CONTENT_OPENING_BRACKET,

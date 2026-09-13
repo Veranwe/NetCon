@@ -96,9 +96,9 @@ public class PacketListener {
 
         Log.debug(packetListenGroup, "process", "Processing packet: " + headerData.packetID());
 
-        if (headerData.packetCount() != node.packetCount) return true;
+        if (headerData.packetCount() != node.packetCountIn) return true;
 
-        node.packetCount = headerData.packetCount() + 1;
+        node.packetCountIn = headerData.packetCount() + 1;
 
         byte[] contentBytes = catchData(packetBytes, BracketData.CONTENT_OPENING_BRACKET, BracketData.CONTENT_CLOSING_BRACKET);
 

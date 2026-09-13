@@ -28,7 +28,8 @@ public class NetNode {
     private boolean verified = false;
 
     private int expectedPacketID;
-    public long packetCount = -1;
+    public long packetCountOut = -1;
+    public long packetCountIn = -1;
 
     public static LogGroup nodeGroup = new LogGroup(NetCon.netRootGroup, "node");
 
@@ -95,10 +96,10 @@ public class NetNode {
     }
 
     public void send(PacketOUT packet) {
-        this.outbound.send(packet, packetCount++);
+        this.outbound.send(packet, packetCountOut++);
     }
     public void send(PacketOUT packet, EncryptionType encryptType) {
-        this.outbound.send(packet, encryptType, packetCount++);
+        this.outbound.send(packet, encryptType, packetCountOut++);
     }
 
     public boolean isVerified() {
@@ -113,7 +114,6 @@ public class NetNode {
         this.expectedPacketID = expectedPacketID;
     }
     public boolean isExpectedPacket(int packetID) {
-        System.out.println("Exp, " + expectedPacketID + " id, " + packetID);
         return this.expectedPacketID == packetID;
     }
 
