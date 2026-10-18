@@ -5,6 +5,7 @@ import src.net.TrackGaze.log.LogGroup;
 import src.pre.NetCon.NetCon;
 import src.pre.NetCon.connection.NetConnection;
 import src.pre.NetCon.connection.client.packets.in.rollingKey.HUpdateRollingKey;
+import src.pre.NetCon.connection.client.packets.in.started.HStarted;
 import src.pre.NetCon.connection.client.packets.in.verification.HKeyExchange;
 import src.pre.NetCon.connection.client.packets.in.verification.HVerificationRequest;
 import src.pre.NetCon.connection.client.packets.in.verification.HVerifyConfirmed;
@@ -41,6 +42,7 @@ public class NetClient implements NetConnection {
         registerSystem(1, HVerificationRequest.class);
         registerSystem(2, HVerifyConfirmed.class);
         registerSystem(3, HKeyExchange.class);
+        registerSystem(4, HStarted.class);
 
         registerSystem(11, HUpdateRollingKey.class);
 

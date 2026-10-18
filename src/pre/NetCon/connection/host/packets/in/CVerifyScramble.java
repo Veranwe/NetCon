@@ -1,5 +1,6 @@
 package src.pre.NetCon.connection.host.packets.in;
 
+import src.pre.NetCon.NetCon;
 import src.pre.NetCon.connection.host.packets.out.verification.HKeyExchange;
 import src.pre.NetCon.connection.host.packets.out.verification.HVerifyConfirmed;
 import src.pre.NetCon.connection.node.NetNode;

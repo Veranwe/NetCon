@@ -7,6 +7,7 @@ import src.net.TrackGaze.log.LogGroup;
 import src.pre.NetCon.connection.NetConnection;
 import src.pre.NetCon.connection.client.NetClient;
 import src.pre.NetCon.connection.host.NetHost;
+import src.pre.NetCon.connection.node.triggers.NodeStarted;
 import src.pre.NetCon.exceptions.InvalidArgument;
 import src.pre.NetCon.exceptions.InvalidConnection;
 import src.pre.NetCon.exceptions.StillRunning;
@@ -15,10 +16,13 @@ import src.pre.NetCon.packet.PacketOUT;
 import src.pre.NetCon.packet.registry.NetRegistry;
 import src.pre.NetCon.security.EncryptionType;
 
+import java.util.ArrayList;
+
 public class NetCon {
 
     private static NetConnection con = null;
     public static final NetRegistry registry = new NetRegistry();
+    public static final ArrayList<NodeStarted> startupTriggers = new ArrayList<>();
 
     public static final LogGroup netRootGroup = new LogGroup(TrackGaze.rootGroup, "net_root");
 
@@ -89,5 +93,14 @@ public class NetCon {
             throw new InvalidArgument("ID's within the bounds of -100 & 100 are reserved for system packets.");
 
         registry.register(id, packetClass);
+    }
+
+    public static void registerTrigger(NodeStarted trigger) {
+        startupTriggers.add(trigger);
+    }
+    public static void started() {
+        for (NodeStarted trigger : startupTriggers) {
+            trigger.trigger();
+        }
     }
 }

@@ -8,6 +8,7 @@ import src.pre.NetCon.connection.host.packets.in.CKeyExchange;
 import src.pre.NetCon.connection.host.packets.in.CNotifyHostReady;
 import src.pre.NetCon.connection.host.packets.in.CVerifyScramble;
 import src.pre.NetCon.connection.host.packets.out.rollingKey.HUpdateRollingKey;
+import src.pre.NetCon.connection.host.packets.out.started.HStarted;
 import src.pre.NetCon.connection.host.packets.out.verification.HKeyExchange;
 import src.pre.NetCon.connection.host.packets.out.verification.HVerificationRequest;
 import src.pre.NetCon.connection.host.packets.out.verification.HVerifyConfirmed;
@@ -50,6 +51,7 @@ public class NetHost implements NetConnection {
         registerSystem(1, HVerificationRequest.class);
         registerSystem(2, HVerifyConfirmed.class);
         registerSystem(3, HKeyExchange.class);
+        registerSystem(4, HStarted.class);
 
         registerSystem(11, HUpdateRollingKey.class);
 
