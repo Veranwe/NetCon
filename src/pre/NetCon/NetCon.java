@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 public class NetCon {
 
-    private static NetConnection con = null;
+    public static NetConnection con = null;
     public static final NetRegistry registry = new NetRegistry();
     public static final ArrayList<NodeStarted> startupTriggers = new ArrayList<>();
 

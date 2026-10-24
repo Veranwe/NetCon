@@ -101,6 +101,11 @@ public class NetHost implements NetConnection {
 
         this.connectedNodes.add(node);
     }
+    public void disconnectNode(NetNode node) {
+        this.connectedNodes.remove(node);
+
+        Log.info(hostGroup, "NodeDisconnected", "A node has disconnected from the host.");
+    }
 
     public void send(PacketOUT packet) {
         for (NetNode node : this.connectedNodes) {

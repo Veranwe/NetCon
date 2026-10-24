@@ -82,6 +82,10 @@ public class NetNode {
         try {
             Log.info(nodeGroup, "Stopping", "Stopping the node.");
 
+            if (NetCon.con instanceof NetHost host) {
+                host.disconnectNode(this);
+            }
+
             this.socket.close();
 
             this.keyManager.stop();

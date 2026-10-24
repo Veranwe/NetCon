@@ -16,6 +16,7 @@ import src.pre.NetCon.security.EncryptionType;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class PacketListener {
 
@@ -46,17 +47,23 @@ public class PacketListener {
 
         this.listener.loop("ListeningForPackets", () -> {
             Holder<byte[]> data = new Holder<>(new byte[0]);
+            byte[] buffer = new byte[262_144];
 
             while (true) {
                 try {
-                    int receivedBytes = inputStream.read();
+                    int receivedBytes = inputStream.read(buffer);
                     if (receivedBytes == -1) break;
 
-                    BitUtil.mergeArrays(data, new byte[]{(byte) receivedBytes});
+                    BitUtil.mergeArrays(
+                            data,
+                            Arrays.copyOf(buffer, receivedBytes)
+                    );
                     if (process(new Holder<>(data.obj))) break;
 
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    node.stop();
+                    Log.error(packetListenGroup, "LostConnection", "Lost connection to a node");
+                    return;
                 }
             }
         });
